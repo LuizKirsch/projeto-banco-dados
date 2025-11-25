@@ -1,4 +1,3 @@
-
 # Sistema de Gestão de Banco de Órgãos
 
 > **Data:** 28 de outubro de 2025  
@@ -165,7 +164,7 @@ COMMIT;
 
 -----
 
-## ⚡ Triggers (Acionadores)
+## ⚡ Triggers
 
 Automações configuradas para garantir a integridade dos dados e logs de auditoria.
 
@@ -239,7 +238,7 @@ DELIMITER ;
 
 -----
 
-## ⚙️ Stored Procedures
+## ⚙️ Procedures
 
 Procedimentos para padronizar inserções e manutenções no banco.
 
@@ -302,7 +301,7 @@ DELIMITER ;
 
 -----
 
-## 🧮 Funções (Functions)
+## 🧮 Funções
 
 ### `tempo_sem_circulacao`
 
