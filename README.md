@@ -420,70 +420,104 @@ VALUES (8, 4, 'concluida');
 
 ## 📚 Dicionário de Dados
 
-### Tabela: `doador`
+## ### 🟦 **Tabela: `doador`**
 
-| Coluna | Tipo | PK/FK | Descrição |
-| :--- | :--- | :--- | :--- |
-| `id_doador` | INT | PK | Identificador único. |
-| `nome` | VARCHAR(75) | - | Nome completo. |
-| `data_nascimento` | DATE | - | Data para cálculo de idade. |
-| `peso` | DECIMAL | - | Peso em kg. |
-| `sexo` | ENUM | - | Sexo biológico. |
+| Coluna            | Tipo                         | PK/FK | Descrição            |
+| ----------------- | ---------------------------- | ----- | -------------------- |
+| `id_doador`       | INT(11)                      | PK    | Identificador único. |
+| `nome`            | VARCHAR(75)                  | –     | Nome completo.       |
+| `data_nascimento` | DATE                         | –     | Data de nascimento.  |
+| `peso`            | DECIMAL(5,2)                 | –     | Peso em kg.          |
+| `sexo`            | ENUM('masculino','feminino') | –     | Sexo biológico.      |
 
-### Tabela: `fornecedor`
+---
 
-| Coluna | Tipo | PK/FK | Descrição |
-| :--- | :--- | :--- | :--- |
-| `id_fornecedor` | INT | PK | Identificador único do hospital/banco. |
-| `nome` | VARCHAR(70) | - | Nome da instituição. |
-| `data_cadastro` | DATE | - | Data de registro. |
-| `status` | ENUM | - | 'ativo' ou 'inativo'. |
-| `telefone` | VARCHAR(20) | - | Contato telefônico. |
-| `email` | VARCHAR(100) | - | E-mail de contato. |
+## ### 🟦 **Tabela: `fornecedor`**
 
-### Tabela: `comprador`
+| Coluna          | Tipo                    | PK/FK | Descrição                     |
+| --------------- | ----------------------- | ----- | ----------------------------- |
+| `id_fornecedor` | INT(11)                 | PK    | Identificador da instituição. |
+| `nome`          | VARCHAR(70)             | –     | Nome do hospital/banco.       |
+| `data_cadastro` | DATE                    | –     | Data de registro.             |
+| `status`        | ENUM('ativo','inativo') | –     | Status operacional.           |
+| `telefone`      | VARCHAR(20)             | –     | Telefone.                     |
+| `email`         | VARCHAR(100)            | –     | E-mail de contato.            |
 
-| Coluna | Tipo | PK/FK | Descrição |
-| :--- | :--- | :--- | :--- |
-| `id_comprador` | INT | PK | Identificador único do receptor. |
-| `nome` | VARCHAR(45) | - | Nome completo. |
-| `sexo` | ENUM | - | Sexo biológico. |
-| `data_cadastro` | DATE | - | Data de registro. |
-| `data_nascimento` | DATE | - | Data de nascimento. |
+---
 
-### Tabela: `orgaos`
+## ### 🟦 **Tabela: `comprador`**
 
-| Coluna | Tipo | PK/FK | Descrição |
-| :--- | :--- | :--- | :--- |
-| `id_orgao` | INT | PK | Identificador único. |
-| `id_fornecedor` | INT | FK | Instituição fornecedora. |
-| `id_doador` | INT | FK | Doador original. |
-| `data_hora_obito` | DATETIME | - | Horário da morte. |
-| `data_hora_retirada` | DATETIME | - | Horário da cirurgia. |
-| `nome_orgao` | VARCHAR(100)| - | Ex: Coração, Rim. |
-| `data_entrada` | DATE | - | Registro no sistema. |
-| `tipo_sanguineo` | VARCHAR(5) | - | Compatibilidade. |
-| `condicao` | VARCHAR(50) | - | Estado clínico. |
-| `data_validade` | DATE | - | Limite de viabilidade. |
-| `valor` | DECIMAL | - | Preço base. |
+| Coluna            | Tipo                         | PK/FK | Descrição                  |
+| ----------------- | ---------------------------- | ----- | -------------------------- |
+| `id_comprador`    | INT(11)                      | PK    | Identificador do receptor. |
+| `nome`            | VARCHAR(45)                  | –     | Nome completo.             |
+| `sexo`            | ENUM('masculino','feminino') | –     | Sexo biológico.            |
+| `data_cadastro`   | DATE                         | –     | Data de registro.          |
+| `data_nascimento` | DATE                         | –     | Data de nascimento.        |
 
-### Tabela: `cotacao`
+---
 
-| Coluna | Tipo | PK/FK | Descrição |
-| :--- | :--- | :--- | :--- |
-| `id_cotacao` | INT | PK | Identificador da oferta. |
-| `id_orgao` | INT | FK | Órgão ofertado. |
-| `id_comprador` | INT | FK | Autor da oferta. |
-| `valor` | DECIMAL | - | Preço ofertado. |
-| `status` | ENUM | - | 'em\_andamento', 'finalizada', 'cancelada'. |
-| `data_cotacao` | DATE | - | Data do lance. |
+## ### 🟦 **Tabela: `orgaos`**
 
-### Tabela: `transacao`
+| Coluna               | Tipo          | PK/FK | Descrição                   |
+| -------------------- | ------------- | ----- | --------------------------- |
+| `id_orgao`           | INT(11)       | PK    | Identificador do órgão.     |
+| `id_fornecedor`      | INT(11)       | FK    | Instituição fornecedora.    |
+| `id_doador`          | INT(11)       | FK    | Doador original.            |
+| `data_hora_obito`    | DATETIME      | –     | Horário do óbito.           |
+| `data_hora_retirada` | DATETIME      | –     | Horário da retirada.        |
+| `nome_orgao`         | VARCHAR(100)  | –     | Nome do órgão.              |
+| `data_entrada`       | DATE          | –     | Data de entrada no sistema. |
+| `tipo_sanguineo`     | VARCHAR(5)    | –     | Tipo sanguíneo.             |
+| `condicao_do_orgao`  | VARCHAR(50)   | –     | Qualidade clínica.          |
+| `data_validade`      | DATE          | –     | Prazo de viabilidade.       |
+| `valor`              | DECIMAL(10,2) | –     | Preço base.                 |
 
-| Coluna | Tipo | PK/FK | Descrição |
-| :--- | :--- | :--- | :--- |
-| `id_transacao` | INT | PK | Identificador da venda. |
-| `id_cotacao` | INT | FK | Cotação vencedora. |
-| `id_comprador` | INT | FK | Comprador final. |
-| `status` | ENUM | - | 'concluida', 'aguardando'. |
-| `data_transacao` | DATE | - | Data de fechamento. |
+---
+
+## ### 🟦 **Tabela: `cotacao`**
+
+| Coluna         | Tipo                                          | PK/FK | Descrição               |
+| -------------- | --------------------------------------------- | ----- | ----------------------- |
+| `id_cotacao`   | INT(11)                                       | PK    | Identificador do lance. |
+| `id_orgao`     | INT(11)                                       | FK    | Órgão ofertado.         |
+| `id_comprador` | INT(11)                                       | FK    | Autor da oferta.        |
+| `valor`        | DECIMAL(10,2)                                 | –     | Valor ofertado.         |
+| `status`       | ENUM('em_andamento','finalizada','cancelada') | –     | Estado atual.           |
+| `data_cotacao` | DATE                                          | –     | Data da oferta.         |
+
+---
+
+## ### 🟦 **Tabela: `transacao`**
+
+| Coluna           | Tipo                                       | PK/FK | Descrição                   |
+| ---------------- | ------------------------------------------ | ----- | --------------------------- |
+| `id_transacao`   | INT(11)                                    | PK    | Identificador da transação. |
+| `id_cotacao`     | INT(11)                                    | FK    | Cotação vencedora.          |
+| `id_comprador`   | INT(11)                                    | FK    | Comprador final.            |
+| `status`         | ENUM('concluida','aguardando','cancelada') | –     | Status final.               |
+| `data_transacao` | DATE                                       | –     | Data da venda.              |
+
+---
+
+## ### 🟦 **Tabela: `log_cotacao`** (Trigger)
+
+| Coluna            | Tipo                                          | PK/FK | Descrição              |
+| ----------------- | --------------------------------------------- | ----- | ---------------------- |
+| `id_log`          | INT(11)                                       | PK    | Identificador do log.  |
+| `id_cotacao`      | INT(11)                                       | FK    | Cotação alterada.      |
+| `status_anterior` | ENUM('em_andamento','finalizada','cancelada') | –     | Status antes.          |
+| `novo_status`     | ENUM('em_andamento','finalizada','cancelada') | –     | Status após alteração. |
+| `data_alteracao`  | DATETIME                                      | –     | Data da alteração.     |
+
+---
+
+## ### 🟦 **Tabela: `orgaos_deletados`** (Trigger)
+
+| Coluna             | Tipo     | PK/FK | Descrição                        |
+| ------------------ | -------- | ----- | -------------------------------- |
+| `id_log`           | INT(11)  | PK    | Identificador do backup.         |
+| `data_exclusao`    | DATETIME | –     | Data da exclusão.                |
+| `dados_orgao_json` | JSON     | –     | JSON completo do órgão removido. |
+
+---
