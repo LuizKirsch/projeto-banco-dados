@@ -32,6 +32,7 @@ Bem-vindo(a) ao sistema de gestão de órgãos\! Este documento foi criado para 
 | Manuela Knobeloch | 11/11/2025 | Funções e Procedures | 2.0 |
 | Vinícius Gausmann | 11/11/2025 | Criação de procedures | 2.1 |
 | Manuela Knobeloch | 21/11/2025 | Explicação detalhada de Funções e Procedures | 2.2 |
+| Luiz Kirsch | 25/11/2025 | Documentação no GitHub | 3.0 |
 
 -----
 
