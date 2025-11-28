@@ -33,7 +33,7 @@ Bem-vindo(a) ao sistema de gestão de órgãos\! Este documento foi criado para 
 | Vinícius Gausmann | 11/11/2025 | Criação de procedures | 2.1 |
 | Manuela Knobeloch | 21/11/2025 | Explicação detalhada de Funções e Procedures | 2.2 |
 | Luiz Kirsch | 25/11/2025 | Documentação no GitHub | 3.0 |
-
+|Vinícius Gausmann | 28/11/2025 | Criação de events | 3.1 | 
 -----
 
 ## 🛠️ Estrutura SQL Completa (DDL)
@@ -350,6 +350,35 @@ BEGIN
 END$$
 DELIMITER ;
 ```
+-----
+
+## Events 
+
+## `evt_limpeza_logs_anuais`
+
+limpa registros muito antigos para poupar espaço.
+
+```sql 
+CREATE EVENT evt_limpeza_logs_anuais
+ON SCHEDULE EVERY 1 MONTH
+DO
+    DELETE FROM log_cotacao 
+    WHERE data_alteracao < DATE_SUB(NOW(), INTERVAL 1 YEAR);
+```
+
+## `evt_cancelar_transacoes_paradas` 
+
+ Se uma transação ficar "aguardando" por muito tempo (por exemplo, 3 dias sem confirmação de pagamento ou logística), ela deveria ser cancelada para não "prender" o órgão indefinidamente.
+
+ ```sql
+ CREATE EVENT evt_cancelar_transacoes_paradas
+ON SCHEDULE EVERY 1 HOUR
+DO
+    UPDATE transacao
+    SET status = 'cancelada'
+    WHERE status = 'aguardando' 
+    AND data_transacao < DATE_SUB(CURDATE(), INTERVAL 3 DAY);
+    ```
 
 -----
 
