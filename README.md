@@ -480,7 +480,7 @@ O arquivo de teste contém um ensaio completo que demonstra todas as funcionalid
 - Análise de logs e estado das tabelas
 - Verificação de events ativos
 - Relatórios avançados de faturamento
-
+```
 -----
 
 -----
@@ -491,7 +491,7 @@ Comando para criar um dump completo do banco de dados:
 
 ```bat
 mysqldump -u root -p --single-transaction --routines --triggers --events banco_orgaos > dump_banco_orgaos.sql
-```
+
 
 **Parâmetros:**
 - `--single-transaction`: Garante consistência dos dados
