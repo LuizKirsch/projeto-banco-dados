@@ -2,7 +2,7 @@
 
 > **Data:** 02 de dezembro de 2025  
 > **Local:** Novo Hamburgo  
-> **Status:** Versão 3.3 - Projeto Completo ✅
+> **Status:** Versão 3.4 - Projeto Completo com Backup Avançado ✅
 
 ## 📖 Introdução
 
@@ -46,6 +46,7 @@ README.md         - Documentação completa do projeto
 |Vinícius Gausmann | 28/11/2025 | Criação de events | 3.1 |
 | Luiz Kirsch | 02/12/2025 | Implementação completa de Views e Events | 3.2 |
 | Luiz Kirsch | 02/12/2025 | Ensaio completo expandido | 3.3 |
+| Luiz Kirsch | 02/12/2025 | Plano de backup/recovery com binlog e scripts .bat | 3.4 |
 -----
 
 ## 🛠️ Estrutura SQL Completa (DDL)
@@ -479,6 +480,374 @@ O arquivo de teste contém um ensaio completo que demonstra todas as funcionalid
 - Análise de logs e estado das tabelas
 - Verificação de events ativos
 - Relatórios avançados de faturamento
+
+-----
+
+## 💾 Plano de Backup e Recovery com Binlog
+
+Procedimentos avançados de backup e recovery utilizando binlog do MySQL para garantir recuperação point-in-time e máxima integridade dos dados.
+
+## ⚙️ Configuração Inicial do MySQL
+
+### 1. Habilitar Binary Logging
+
+Edite o arquivo `my.ini` (geralmente em `C:\ProgramData\MySQL\MySQL Server 8.0\`):
+
+```ini
+[mysqld]
+# Configurações de Binary Log
+log-bin=mysql-bin
+binlog-format=ROW
+expire_logs_days=7
+max_binlog_size=100M
+sync_binlog=1
+
+# Configurações para Recovery
+server-id=1
+gtid_mode=ON
+enforce-gtid-consistency=ON
+
+# Configurações de Performance para Backup
+innodb_flush_log_at_trx_commit=1
+```
+
+### 2. Reiniciar Serviço MySQL
+
+```bat
+net stop mysql
+net start mysql
+```
+
+## 📋 Estratégia de Backup
+
+### Tipos de Backup
+- **Backup Completo + Binlog**: Backup físico completo + logs binários
+- **Backup Incremental**: Apenas binlogs desde último backup
+- **Point-in-Time Recovery**: Recuperação até momento específico
+
+### Frequência
+- **Backup Completo**: Diário às 02:00 AM
+- **Flush Binlogs**: A cada 6 horas
+- **Backup Binlogs**: Contínuo (automático)
+
+## 🔧 Scripts de Backup (.bat)
+
+### 1. Script Principal: `backup_completo.bat`
+
+```bat
+@echo off
+setlocal enabledelayedexpansion
+
+REM ====================================================
+REM Script de Backup Completo com Binlog
+REM Sistema de Gestão de Banco de Órgãos
+REM ====================================================
+
+REM Configurações
+set MYSQL_USER=admin
+set MYSQL_PASS=sua_senha
+set DB_NAME=banco_orgaos
+set BACKUP_DIR=C:\Backups\BancoOrgaos
+set DATA=%date:~6,4%%date:~3,2%%date:~0,2%
+set HORA=%time:~0,2%%time:~3,2%%time:~6,2%
+set HORA=%HORA: =0%
+
+REM Criar diretórios se não existirem
+if not exist "%BACKUP_DIR%\Completo" mkdir "%BACKUP_DIR%\Completo"
+if not exist "%BACKUP_DIR%\Binlogs" mkdir "%BACKUP_DIR%\Binlogs"
+if not exist "%BACKUP_DIR%\Logs" mkdir "%BACKUP_DIR%\Logs"
+
+echo [%date% %time%] Iniciando backup completo... >> %BACKUP_DIR%\Logs\backup.log
+
+REM 1. FLUSH LOGS para forçar novo binlog
+echo Executando FLUSH LOGS...
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% -e "FLUSH LOGS;" 2>>%BACKUP_DIR%\Logs\erro.log
+
+REM 2. Obter posição atual do binlog
+echo Obtendo posição do binlog...
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% -e "SHOW MASTER STATUS;" > %BACKUP_DIR%\Completo\binlog_position_%DATA%_%HORA%.txt
+
+REM 3. Backup completo do banco
+echo Realizando backup completo...
+mysqldump -u %MYSQL_USER% -p%MYSQL_PASS% ^
+    --single-transaction ^
+    --routines ^
+    --triggers ^
+    --events ^
+    --master-data=2 ^
+    --flush-logs ^
+    --databases %DB_NAME% > %BACKUP_DIR%\Completo\backup_completo_%DATA%_%HORA%.sql
+
+if %errorlevel% neq 0 (
+    echo [%date% %time%] ERRO: Falha no backup completo >> %BACKUP_DIR%\Logs\backup.log
+    exit /b 1
+)
+
+REM 4. Backup dos binlogs atuais
+call :backup_binlogs
+
+REM 5. Verificar integridade do backup
+echo Verificando integridade do backup...
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% -e "SELECT 'Backup OK' as status;" < %BACKUP_DIR%\Completo\backup_completo_%DATA%_%HORA%.sql > nul 2>&1
+if %errorlevel% neq 0 (
+    echo [%date% %time%] AVISO: Backup pode estar corrompido >> %BACKUP_DIR%\Logs\backup.log
+) else (
+    echo [%date% %time%] Backup completo realizado com sucesso: backup_completo_%DATA%_%HORA%.sql >> %BACKUP_DIR%\Logs\backup.log
+)
+
+REM 6. Limpeza de backups antigos (manter 30 dias)
+forfiles /p "%BACKUP_DIR%\Completo" /s /m *.sql /d -30 /c "cmd /c del @path" 2>nul
+
+echo Backup completo finalizado!
+goto :eof
+
+:backup_binlogs
+echo Copiando binlogs...
+REM Obter diretório de dados do MySQL
+for /f "tokens=2 delims==" %%a in ('mysql -u %MYSQL_USER% -p%MYSQL_PASS% -e "SHOW VARIABLES LIKE 'datadir';" --skip-column-names') do set MYSQL_DATADIR=%%a
+REM Remover espaços e aspas
+set MYSQL_DATADIR=%MYSQL_DATADIR: =%
+set MYSQL_DATADIR=%MYSQL_DATADIR:"=%
+
+REM Copiar binlogs para backup
+xcopy "%MYSQL_DATADIR%mysql-bin.*" "%BACKUP_DIR%\Binlogs\" /Y /Q 2>nul
+echo [%date% %time%] Binlogs copiados para backup >> %BACKUP_DIR%\Logs\backup.log
+goto :eof
+```
+
+### 2. Script de Backup Incremental: `backup_incremental.bat`
+
+```bat
+@echo off
+setlocal enabledelayedexpansion
+
+REM ====================================================
+REM Script de Backup Incremental (Binlogs)
+REM ====================================================
+
+set MYSQL_USER=admin
+set MYSQL_PASS=sua_senha
+set BACKUP_DIR=C:\Backups\BancoOrgaos
+set DATA=%date:~6,4%%date:~3,2%%date:~0,2%
+set HORA=%time:~0,2%%time:~3,2%%time:~6,2%
+set HORA=%HORA: =0%
+
+echo [%date% %time%] Iniciando backup incremental... >> %BACKUP_DIR%\Logs\backup.log
+
+REM 1. FLUSH LOGS para fechar binlog atual
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% -e "FLUSH LOGS;"
+
+REM 2. Obter lista de binlogs
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% -e "SHOW BINARY LOGS;" > %BACKUP_DIR%\Binlogs\binlog_list_%DATA%_%HORA%.txt
+
+REM 3. Copiar novos binlogs
+for /f "tokens=2 delims==" %%a in ('mysql -u %MYSQL_USER% -p%MYSQL_PASS% -e "SHOW VARIABLES LIKE 'datadir';" --skip-column-names') do set MYSQL_DATADIR=%%a
+set MYSQL_DATADIR=%MYSQL_DATADIR: =%
+set MYSQL_DATADIR=%MYSQL_DATADIR:"=%
+
+xcopy "%MYSQL_DATADIR%mysql-bin.*" "%BACKUP_DIR%\Binlogs\" /Y /D /Q
+
+echo [%date% %time%] Backup incremental finalizado >> %BACKUP_DIR%\Logs\backup.log
+echo Backup incremental finalizado!
+```
+
+## 🔄 Procedimentos de Recovery
+
+### 1. Recovery Completo: `recovery_completo.bat`
+
+```bat
+@echo off
+setlocal enabledelayedexpansion
+
+REM ====================================================
+REM Script de Recovery Completo
+REM ====================================================
+
+set MYSQL_USER=admin
+set MYSQL_PASS=sua_senha
+set DB_NAME=banco_orgaos
+set BACKUP_DIR=C:\Backups\BancoOrgaos
+
+echo ATENCAO: Este script ira SUBSTITUIR COMPLETAMENTE o banco de dados!
+set /p "confirmacao=Digite 'CONFIRMO' para continuar: "
+if not "%confirmacao%"=="CONFIRMO" (
+    echo Operacao cancelada.
+    exit /b 1
+)
+
+REM Listar backups disponíveis
+echo Backups disponíveis:
+dir "%BACKUP_DIR%\Completo\backup_completo_*.sql" /b
+
+set /p "arquivo_backup=Digite o nome do arquivo de backup (com extensao): "
+if not exist "%BACKUP_DIR%\Completo\%arquivo_backup%" (
+    echo Arquivo nao encontrado!
+    exit /b 1
+)
+
+echo Realizando recovery do backup: %arquivo_backup%
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% < "%BACKUP_DIR%\Completo\%arquivo_backup%"
+
+if %errorlevel% neq 0 (
+    echo ERRO: Falha no recovery!
+    exit /b 1
+)
+
+echo Recovery completo realizado com sucesso!
+echo Verificando integridade...
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% %DB_NAME% -e "SHOW TABLES;"
+```
+
+### 2. Recovery Point-in-Time: `recovery_point_in_time.bat`
+
+```bat
+@echo off
+setlocal enabledelayedexpansion
+
+REM ====================================================
+REM Recovery Point-in-Time usando Binlogs
+REM ====================================================
+
+set MYSQL_USER=admin
+set MYSQL_PASS=sua_senha
+set DB_NAME=banco_orgaos
+set BACKUP_DIR=C:\Backups\BancoOrgaos
+
+echo ===== RECOVERY POINT-IN-TIME =====
+echo Este procedimento permite recuperar o banco ate um momento especifico.
+
+REM Listar backups disponíveis
+echo Backups completos disponiveis:
+dir "%BACKUP_DIR%\Completo\backup_completo_*.sql" /b
+
+set /p "arquivo_backup=Digite o nome do backup base: "
+if not exist "%BACKUP_DIR%\Completo\%arquivo_backup%" (
+    echo Arquivo nao encontrado!
+    exit /b 1
+)
+
+echo Exemplo de formato: 2025-12-02 14:30:00
+set /p "data_hora_final=Digite data/hora final para recovery (YYYY-MM-DD HH:MM:SS): "
+
+echo ATENCAO: Esta operacao substituira o banco atual!
+set /p "confirmacao=Digite 'CONFIRMO' para continuar: "
+if not "%confirmacao%"=="CONFIRMO" (
+    echo Operacao cancelada.
+    exit /b 1
+)
+
+REM 1. Restaurar backup base
+echo Passo 1: Restaurando backup base...
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% < "%BACKUP_DIR%\Completo\%arquivo_backup%"
+
+REM 2. Aplicar binlogs até o ponto desejado
+echo Passo 2: Aplicando binlogs ate %data_hora_final%...
+for %%f in ("%BACKUP_DIR%\Binlogs\mysql-bin.*") do (
+    echo Processando: %%~nxf
+    mysqlbinlog --stop-datetime="%data_hora_final%" "%%f" | mysql -u %MYSQL_USER% -p%MYSQL_PASS% %DB_NAME%
+)
+
+echo Recovery point-in-time concluido!
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% %DB_NAME% -e "SELECT NOW() as 'Recovery concluido em:', COUNT(*) as 'Total cotacoes' FROM cotacao;"
+```
+
+### 3. Script de Verificação: `verificar_backup.bat`
+
+```bat
+@echo off
+setlocal enabledelayedexpansion
+
+REM ====================================================
+REM Script de Verificação de Backups
+REM ====================================================
+
+set MYSQL_USER=admin
+set MYSQL_PASS=sua_senha
+set DB_NAME=banco_orgaos
+set BACKUP_DIR=C:\Backups\BancoOrgaos
+
+echo ===== VERIFICACAO DE INTEGRIDADE DOS BACKUPS =====
+
+REM 1. Verificar último backup completo
+echo 1. Verificando ultimo backup completo...
+for /f "delims=" %%a in ('dir "%BACKUP_DIR%\Completo\backup_completo_*.sql" /b /od') do set ultimo_backup=%%a
+
+if "%ultimo_backup%"=="" (
+    echo ERRO: Nenhum backup completo encontrado!
+    exit /b 1
+)
+
+echo Ultimo backup: %ultimo_backup%
+
+REM Testar se o backup é válido
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% -e "CREATE DATABASE IF NOT EXISTS teste_backup;"
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% teste_backup < "%BACKUP_DIR%\Completo\%ultimo_backup%" >nul 2>&1
+
+if %errorlevel% neq 0 (
+    echo ERRO: Backup esta corrompido!
+) else (
+    echo OK: Backup integro
+    mysql -u %MYSQL_USER% -p%MYSQL_PASS% -e "DROP DATABASE teste_backup;"
+)
+
+REM 2. Verificar binlogs
+echo 2. Verificando binlogs...
+mysql -u %MYSQL_USER% -p%MYSQL_PASS% -e "SHOW BINARY LOGS;"
+
+echo Verificacao concluida!
+```
+
+## 📅 Cronograma Automatizado
+
+### Configurar Tarefas no Windows (Executar como Administrador)
+
+```bat
+REM Backup completo diário às 02:00
+schtasks /create /tn "Backup Completo Banco Orgaos" /tr "C:\Backups\BancoOrgaos\Scripts\backup_completo.bat" /sc daily /st 02:00 /ru SYSTEM
+
+REM Backup incremental a cada 6 horas
+schtasks /create /tn "Backup Incremental Banco Orgaos" /tr "C:\Backups\BancoOrgaos\Scripts\backup_incremental.bat" /sc hourly /mo 6 /ru SYSTEM
+
+REM Verificação diária às 08:00
+schtasks /create /tn "Verificacao Backup Banco Orgaos" /tr "C:\Backups\BancoOrgaos\Scripts\verificar_backup.bat" /sc daily /st 08:00 /ru SYSTEM
+```
+
+## 🚨 Procedimentos de Emergência
+
+### 1. Backup de Emergência Rápido
+
+```bat
+REM Backup rápido antes de manutenção
+mysqldump -u admin -psenha --single-transaction banco_orgaos > backup_emergencia_%date:~6,4%%date:~3,2%%date:~0,2%_%time:~0,2%%time:~3,2%.sql
+```
+
+### 2. Recovery de Emergência
+
+```bat
+REM Recovery mais recente disponível
+mysql -u admin -psenha < "C:\Backups\BancoOrgaos\Completo\backup_emergencia_*.sql"
+```
+
+## 📝 Checklist de Disaster Recovery
+
+### Antes do Incidente
+- [ ] Backups automáticos configurados
+- [ ] Binlogs habilitados e funcionando
+- [ ] Scripts testados mensalmente
+- [ ] Documentação atualizada
+
+### Durante o Incidente
+- [ ] Avaliar extensão do problema
+- [ ] Parar aplicações
+- [ ] Identificar último backup válido
+- [ ] Executar recovery apropriado
+- [ ] Verificar integridade dos dados
+
+### Após o Recovery
+- [ ] Testar funcionalidades críticas
+- [ ] Reiniciar aplicações
+- [ ] Monitorar logs por 24h
+- [ ] Documentar incidente
 
 -----
 
