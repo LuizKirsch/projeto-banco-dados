@@ -45,7 +45,7 @@ README.md         - Documentação completa do projeto
 | Luiz Kirsch | 25/11/2025 | Documentação no GitHub | 3.0 |
 |Vinícius Gausmann | 28/11/2025 | Criação de events | 3.1 |
 | Luiz Kirsch | 02/12/2025 | Implementação completa de Views e Events | 3.2 |
-| GitHub Copilot | 02/12/2025 | Ensaio completo expandido | 3.3 |
+| Luiz Kirsch | 02/12/2025 | Ensaio completo expandido | 3.3 |
 -----
 
 ## 🛠️ Estrutura SQL Completa (DDL)
