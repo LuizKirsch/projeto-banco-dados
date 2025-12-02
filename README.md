@@ -8,6 +8,16 @@
 
 Bem-vindo(a) ao sistema de gestão de órgãos\! Este documento foi criado para documentar a estrutura e a dinâmica do nosso sistema de banco de dados. Nosso foco principal é rastrear o órgão desde a "doação" até a transação final de compra, garantindo transparência, integridade e eficiência no processo.
 
+## 📁 Estrutura do Projeto
+
+```
+01_estrutura.sql  - Criação de tabelas e relacionamentos
+02_logica.sql     - Triggers, functions, procedures e events  
+03_teste.sql      - Dados de teste e exemplos
+04_views.sql      - Views para consultas e relatórios
+README.md         - Documentação completa do projeto
+```
+
 -----
 
 ## 👨‍💻 Autores e Equipe
@@ -33,7 +43,8 @@ Bem-vindo(a) ao sistema de gestão de órgãos\! Este documento foi criado para 
 | Vinícius Gausmann | 11/11/2025 | Criação de procedures | 2.1 |
 | Manuela Knobeloch | 21/11/2025 | Explicação detalhada de Funções e Procedures | 2.2 |
 | Luiz Kirsch | 25/11/2025 | Documentação no GitHub | 3.0 |
-|Vinícius Gausmann | 28/11/2025 | Criação de events | 3.1 | 
+|Vinícius Gausmann | 28/11/2025 | Criação de events | 3.1 |
+| Luiz Kirsch | 02/12/2025 | Implementação completa de Views e Events | 3.2 |
 -----
 
 ## 🛠️ Estrutura SQL Completa (DDL)
@@ -151,6 +162,30 @@ COMMIT;
 
 -----
 
+## 👁️ Views
+
+Views criadas para facilitar consultas e relatórios do sistema.
+
+### 1. `vw_orgaos_disponiveis`
+Listagem completa de órgãos ainda válidos com informações do doador e fornecedor.
+
+### 2. `vw_cotacoes_ativas`
+Cotações em andamento com cálculo de percentual acima do valor base e dados do comprador.
+
+### 3. `vw_transacoes_concluidas`
+Histórico de todas as transações finalizadas com sucesso.
+
+### 4. `vw_ranking_compradores`
+Ranking dos compradores mais ativos no sistema.
+
+### 5. `vw_orgaos_proximos_vencimento`
+Órgãos que vencem nos próximos 3 dias com suas cotações ativas.
+
+### 6. `vw_auditoria_cotacoes`
+Log completo de alterações de status nas cotações para auditoria.
+
+-----
+
 ## ⚡ Triggers
 
 Automações configuradas para garantir a integridade dos dados e logs de auditoria.
@@ -222,6 +257,28 @@ END
 $$
 DELIMITER ;
 ```
+
+-----
+
+## ⏰ Events
+
+Automações agendadas para manutenção e otimização do sistema.
+
+### 1. `evt_limpeza_logs_anuais`
+Executa mensalmente para remover:
+- Logs de cotação com mais de 1 ano
+- Backups de órgãos deletados com mais de 2 anos
+
+### 2. `evt_cancelar_transacoes_paradas`
+Executa a cada hora para cancelar transações que estão aguardando há mais de 3 dias.
+
+### 3. `evt_atualizar_orgaos_expirados`
+Executa a cada 6 horas para cancelar cotações de órgãos expirados.
+
+### 4. `evt_verificar_vencimentos`
+Executa a cada 12 horas para:
+- Registrar logs de órgãos próximos ao vencimento
+- Cancelar cotações de órgãos que vencerão em 24 horas
 
 -----
 

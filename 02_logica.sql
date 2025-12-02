@@ -152,4 +152,70 @@ BEGIN
     RETURN TIMESTAMPDIFF(YEAR, data_nascimento_comprador, CURDATE()); 
 END$$
 
+
+-- =============================================
+-- EVENTS
+-- =============================================
+
+-- 1. Event: Limpeza de Logs Antigos
+DROP EVENT IF EXISTS evt_limpeza_logs_anuais$$
+CREATE EVENT evt_limpeza_logs_anuais
+ON SCHEDULE EVERY 1 MONTH
+STARTS '2025-01-01 02:00:00'
+DO
+BEGIN
+    DELETE FROM log_cotacao 
+    WHERE data_alteracao < DATE_SUB(NOW(), INTERVAL 1 YEAR);
+    
+    DELETE FROM orgaos_deletados 
+    WHERE data_exclusao < DATE_SUB(NOW(), INTERVAL 2 YEAR);
+END$$
+
+-- 2. Event: Cancelar Transações Paradas
+DROP EVENT IF EXISTS evt_cancelar_transacoes_paradas$$
+CREATE EVENT evt_cancelar_transacoes_paradas
+ON SCHEDULE EVERY 1 HOUR
+STARTS '2025-01-01 00:00:00'
+DO
+BEGIN
+    UPDATE transacao
+    SET status = 'cancelada'
+    WHERE status = 'aguardando' 
+    AND data_transacao < DATE_SUB(CURDATE(), INTERVAL 3 DAY);
+END$$
+
+-- 3. Event: Atualização Automática de Órgãos Expirados
+DROP EVENT IF EXISTS evt_atualizar_orgaos_expirados$$
+CREATE EVENT evt_atualizar_orgaos_expirados
+ON SCHEDULE EVERY 6 HOUR
+STARTS '2025-01-01 00:00:00'
+DO
+BEGIN
+    CALL Atualiza_Orgaos_Expirados();
+END$$
+
+-- 4. Event: Notificação de Órgãos Próximos ao Vencimento
+DROP EVENT IF EXISTS evt_verificar_vencimentos$$
+CREATE EVENT evt_verificar_vencimentos
+ON SCHEDULE EVERY 12 HOUR
+STARTS '2025-01-01 08:00:00'
+DO
+BEGIN
+    INSERT INTO log_cotacao (id_cotacao, status_anterior, novo_status)
+    SELECT 
+        c.id_cotacao,
+        'em_andamento' AS status_anterior,
+        'cancelada' AS novo_status
+    FROM cotacao c
+    JOIN orgaos o ON c.id_orgao = o.id_orgao
+    WHERE o.data_validade <= DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+    AND c.status = 'em_andamento';
+    
+    UPDATE cotacao c
+    JOIN orgaos o ON c.id_orgao = o.id_orgao
+    SET c.status = 'cancelada'
+    WHERE o.data_validade <= DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+    AND c.status = 'em_andamento';
+END$$
+
 DELIMITER ;
