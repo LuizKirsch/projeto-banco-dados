@@ -2,7 +2,7 @@
 
 > **Data:** 28 de outubro de 2025  
 > **Local:** Novo Hamburgo  
-> **Status:** Versão 2.2
+> **Status:** Versão 3.2
 
 ## 📖 Introdução
 
