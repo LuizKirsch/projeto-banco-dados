@@ -514,8 +514,8 @@ innodb_flush_log_at_trx_commit=1
 ### 2. Reiniciar Serviço MySQL
 
 ```bat
-net stop mysql
-net start mysql
+net stop mysql80
+net start mysql80
 ```
 
 ## 📋 Estratégia de Backup
@@ -544,8 +544,8 @@ REM Sistema de Gestão de Banco de Órgãos
 REM ====================================================
 
 REM Configurações
-set MYSQL_USER=admin
-set MYSQL_PASS=sua_senha
+set MYSQL_USER=root
+set MYSQL_PASS=sua_senha_aqui
 set DB_NAME=banco_orgaos
 set BACKUP_DIR=C:\Backups\BancoOrgaos
 set DATA=%date:~6,4%%date:~3,2%%date:~0,2%
@@ -625,8 +625,8 @@ REM ====================================================
 REM Script de Backup Incremental (Binlogs)
 REM ====================================================
 
-set MYSQL_USER=admin
-set MYSQL_PASS=sua_senha
+set MYSQL_USER=root
+set MYSQL_PASS=sua_senha_aqui
 set BACKUP_DIR=C:\Backups\BancoOrgaos
 set DATA=%date:~6,4%%date:~3,2%%date:~0,2%
 set HORA=%time:~0,2%%time:~3,2%%time:~6,2%
@@ -663,8 +663,8 @@ REM ====================================================
 REM Script de Recovery Completo
 REM ====================================================
 
-set MYSQL_USER=admin
-set MYSQL_PASS=sua_senha
+set MYSQL_USER=root
+set MYSQL_PASS=sua_senha_aqui
 set DB_NAME=banco_orgaos
 set BACKUP_DIR=C:\Backups\BancoOrgaos
 
@@ -708,8 +708,8 @@ REM ====================================================
 REM Recovery Point-in-Time usando Binlogs
 REM ====================================================
 
-set MYSQL_USER=admin
-set MYSQL_PASS=sua_senha
+set MYSQL_USER=root
+set MYSQL_PASS=sua_senha_aqui
 set DB_NAME=banco_orgaos
 set BACKUP_DIR=C:\Backups\BancoOrgaos
 
@@ -761,8 +761,8 @@ REM ====================================================
 REM Script de Verificação de Backups
 REM ====================================================
 
-set MYSQL_USER=admin
-set MYSQL_PASS=sua_senha
+set MYSQL_USER=root
+set MYSQL_PASS=sua_senha_aqui
 set DB_NAME=banco_orgaos
 set BACKUP_DIR=C:\Backups\BancoOrgaos
 
@@ -818,14 +818,14 @@ schtasks /create /tn "Verificacao Backup Banco Orgaos" /tr "C:\Backups\BancoOrga
 
 ```bat
 REM Backup rápido antes de manutenção
-mysqldump -u admin -psenha --single-transaction banco_orgaos > backup_emergencia_%date:~6,4%%date:~3,2%%date:~0,2%_%time:~0,2%%time:~3,2%.sql
+mysqldump -u root -psenha --single-transaction banco_orgaos > backup_emergencia_%date:~6,4%%date:~3,2%%date:~0,2%_%time:~0,2%%time:~3,2%.sql
 ```
 
 ### 2. Recovery de Emergência
 
 ```bat
 REM Recovery mais recente disponível
-mysql -u admin -psenha < "C:\Backups\BancoOrgaos\Completo\backup_emergencia_*.sql"
+mysql -u root -psenha --force < "C:\Backups\BancoOrgaos\Completo\backup_emergencia_*.sql"
 ```
 
 ## 📝 Checklist de Disaster Recovery
