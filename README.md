@@ -1,8 +1,8 @@
 # Sistema de Gestão de Banco de Órgãos
 
-> **Data:** 28 de outubro de 2025  
+> **Data:** 02 de dezembro de 2025  
 > **Local:** Novo Hamburgo  
-> **Status:** Versão 3.2
+> **Status:** Versão 3.3 - Projeto Completo ✅
 
 ## 📖 Introdução
 
@@ -13,7 +13,7 @@ Bem-vindo(a) ao sistema de gestão de órgãos\! Este documento foi criado para 
 ```
 01_estrutura.sql  - Criação de tabelas e relacionamentos
 02_logica.sql     - Triggers, functions, procedures e events  
-03_teste.sql      - Dados de teste e exemplos
+03_teste.sql      - Ensaio completo: inserts, updates, deletes, selects
 04_views.sql      - Views para consultas e relatórios
 README.md         - Documentação completa do projeto
 ```
@@ -45,6 +45,7 @@ README.md         - Documentação completa do projeto
 | Luiz Kirsch | 25/11/2025 | Documentação no GitHub | 3.0 |
 |Vinícius Gausmann | 28/11/2025 | Criação de events | 3.1 |
 | Luiz Kirsch | 02/12/2025 | Implementação completa de Views e Events | 3.2 |
+| GitHub Copilot | 02/12/2025 | Ensaio completo expandido | 3.3 |
 -----
 
 ## 🛠️ Estrutura SQL Completa (DDL)
@@ -436,6 +437,48 @@ DO
     WHERE status = 'aguardando' 
     AND data_transacao < DATE_SUB(CURDATE(), INTERVAL 3 DAY);
     ```
+
+-----
+
+## 🧪 Ensaio Completo (03_teste.sql)
+
+O arquivo de teste contém um ensaio completo que demonstra todas as funcionalidades do sistema:
+
+### Parte 1: Inserção de Dados
+- Cadastro de doadores usando procedures
+- Inserção de fornecedores e compradores
+- Criação de órgãos e cotações
+
+### Parte 2: Testes de Funções
+- Verificação do cálculo de idade dos compradores
+- Validação das funções personalizadas
+
+### Parte 3: Alterações (Updates)
+- Teste de triggers através de alterações de status
+- Modificação de dados para verificar logs
+- Atualização de valores e condições
+
+### Parte 4: Transações
+- Simulação de vendas concluídas e pendentes
+- Teste do fluxo completo de negociação
+
+### Parte 5: Consultas das Views
+- Demonstração de todas as 6 views criadas
+- Relatórios de órgãos, cotações e transações
+- Análises de ranking e auditoria
+
+### Parte 6: Teste de Procedures
+- Execução de procedures de manutenção
+- Verificação de funcionamento automatizado
+
+### Parte 7: Exclusões (Deletes)
+- Teste de triggers de backup
+- Verificação de integridade referencial
+
+### Parte 8: Verificações Finais
+- Análise de logs e estado das tabelas
+- Verificação de events ativos
+- Relatórios avançados de faturamento
 
 -----
 
