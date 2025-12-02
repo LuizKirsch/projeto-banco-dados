@@ -480,9 +480,9 @@ O arquivo de teste contém um ensaio completo que demonstra todas as funcionalid
 - Análise de logs e estado das tabelas
 - Verificação de events ativos
 - Relatórios avançados de faturamento
-```
------
 
+-----
+```
 -----
 
 ## 💾 Dump do Banco
