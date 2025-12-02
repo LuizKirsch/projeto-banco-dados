@@ -482,6 +482,7 @@ O arquivo de teste contém um ensaio completo que demonstra todas as funcionalid
 - Relatórios avançados de faturamento
 
 -----
+```
 
 ## 💾 Plano de Backup e Recovery com Binlog
 
@@ -509,7 +510,7 @@ enforce-gtid-consistency=ON
 
 # Configurações de Performance para Backup
 innodb_flush_log_at_trx_commit=1
-```
+
 
 ### 2. Reiniciar Serviço MySQL
 
