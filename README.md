@@ -46,7 +46,7 @@ README.md         - Documentação completa do projeto
 |Vinícius Gausmann | 28/11/2025 | Criação de events | 3.1 |
 | Luiz Kirsch | 02/12/2025 | Implementação completa de Views e Events | 3.2 |
 | Luiz Kirsch | 02/12/2025 | Ensaio completo expandido | 3.3 |
-| Luiz Kirsch | 02/12/2025 | Adicionado script .bat para criar um dump do banco | 3.4 |
+| Jeferson Pierre | 04/12/2025 | Criando seção de backup/recovery | 3.4 |
 -----
 
 ## 🛠️ Estrutura SQL Completa (DDL)
