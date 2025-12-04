@@ -485,19 +485,74 @@ O arquivo de teste contém um ensaio completo que demonstra todas as funcionalid
 ```
 -----
 
-## 💾 Dump do Banco
+## 💾 Plano de Backup e Recovery do Banco de Dados
 
-Comando para criar um dump completo do banco de dados:
+Esta seção descreve um processo simples de backup e recovery do banco de dados utilizado neste projeto. O objetivo é garantir que os dados e objetos do banco (tabelas, views, índices e demais estruturas) possam ser facilmente salvos e recuperados em caso de falhas, testes ou migrações.
 
-```bat
-mysqldump -u root -p --single-transaction --routines --triggers --events banco_orgaos > dump_banco_orgaos.sql
+🔹 1. Backup do Banco de Dados
+
+O backup é feito por meio de um dump, que exporta toda a estrutura e os dados do banco para um arquivo .sql.
+
+Passo a passo:
+
+1. Acesse o terminal e conecte-se ao servidor onde o banco está hospedado.
+
+2. Execute o comando de dump:
+
+```bash
+mysqldump -u <usuario> -p <nome_do_banco> > backup_projeto.sql
+```
+
+3. Insira a senha quando solicitado.
+
+4. O arquivo backup_projeto.sql será gerado no diretório onde o comando foi executado.
+
+O que está incluído no dump?
+
+O comando acima exporta:
+
+<li>Estrutura das tabelas</li>
+
+<li>Dados inseridos</li>
+
+<li>Índices</li>
+
+<li>Chaves primárias e estrangeiras</li>
+
+<li>Triggers</li>
+
+<li>Views</li>
+
+<li>Stored procedures e functions (se o parâmetro --routines estiver habilitado por padrão)</li>
 
 
-**Parâmetros:**
-- `--single-transaction`: Garante consistência dos dados
-- `--routines`: Inclui procedures e functions
-- `--triggers`: Inclui triggers
-- `--events`: Inclui events
+Caso queira garantir a exportação de tudo:
+
+```bash
+mysqldump --routines --triggers --events -u <usuario> -p <nome_do_banco> > backup_completo.sql
+```
+
+🔹 2. Recovery do Banco de Dados
+
+O recovery consiste em restaurar um arquivo de dump em um novo banco ou sobrescrever um existente.
+
+Passo a passo:
+
+Crie um novo banco (caso necessário):
+
+```sql
+CREATE DATABASE projeto_banco;
+```
+
+Execute a restauração:
+
+```bash
+mysql -u <usuario> -p projeto_banco < backup_projeto.sql
+```
+
+Insira a senha quando solicitado.
+
+O banco será recriado com a mesma estrutura e dados presentes no backup.
 
 -----
 
