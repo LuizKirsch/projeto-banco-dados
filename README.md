@@ -46,7 +46,8 @@ README.md         - Documentação completa do projeto
 |Vinícius Gausmann | 28/11/2025 | Criação de events | 3.1 |
 | Luiz Kirsch | 02/12/2025 | Implementação completa de Views e Events | 3.2 |
 | Luiz Kirsch | 02/12/2025 | Ensaio completo expandido | 3.3 |
-| Jeferson Pierre | 04/12/2025 | Criando seção de backup/recovery | 3.4 |
+| Jeferson Pierre | 04/12/2025 | Criando seção de backup/recovery Dump | 3.4 |
+| Jeferson Pierre | 05/12/2025 | Criando seção de backup/recovery Binlog | 3.5 |
 -----
 
 ## 🛠️ Estrutura SQL Completa (DDL)
@@ -489,6 +490,16 @@ O arquivo de teste contém um ensaio completo que demonstra todas as funcionalid
 
 Esta seção descreve um processo simples de backup e recovery do banco de dados utilizado neste projeto. O objetivo é garantir que os dados e objetos do banco (tabelas, views, índices e demais estruturas) possam ser facilmente salvos e recuperados em caso de falhas, testes ou migrações.
 
+O processo de recuperação seguirá a seguinte ordem:
+
+1. Restaurar um backup completo (dump)
+
+2. Aplicar os eventos do binlog após o backup
+
+3. Restaurar o banco até o momento desejado
+
+### Dump
+
 🔹 1. Backup do Banco de Dados
 
 O backup é feito por meio de um dump, que exporta toda a estrutura e os dados do banco para um arquivo .sql.
@@ -532,6 +543,7 @@ Caso queira garantir a exportação de tudo:
 mysqldump --routines --triggers --events -u <usuario> -p <nome_do_banco> > backup_completo.sql
 ```
 
+
 🔹 2. Recovery do Banco de Dados
 
 O recovery consiste em restaurar um arquivo de dump em um novo banco ou sobrescrever um existente.
@@ -553,6 +565,37 @@ mysql -u <usuario> -p projeto_banco < backup_projeto.sql
 Insira a senha quando solicitado.
 
 O banco será recriado com a mesma estrutura e dados presentes no backup.
+
+### Binlog
+
+As configurações do binlog devem ser inseridas no arquivo de configuração do banco, my.ini (Windows) e my.cnf (Linux.)
+
+
+🔹 1. Configuração e ativação do binlog
+
+```ini
+server_id=1
+log-bin="C:/ProgramData/MySQL/MySQL Server 8.0/Data/mysql-bin"
+binlog_format=ROW
+expire_logs_days=7
+max_binlog_size=1024M
+sync_binlog=1
+```
+
+Serão gerados arquivos neste padrão:
+
+```
+mysql-bin.000001
+```
+
+🔹 2. Recuperando os dados
+
+Após recuperação do banco via dump, efetuar a recuperação dos dados do log
+
+```bash
+mysqlbinlog mysql-bin.000001 | mysql -u root -p
+```
+
 
 -----
 
