@@ -40,8 +40,9 @@ README.md         - Documentação completa do projeto
 | Luiz Kirsch | 31/10/2025 | Adição de SQL (DDL) e exemplos de uso | 1.2 |
 | Manuela Knobeloch | 31/10/2025 | Adição de explicação das Triggers | 1.3 |
 | Manuela Knobeloch | 11/11/2025 | Funções e Procedures | 2.0 |
-| Vinícius Gausmann | 11/11/2025 | Criação de procedures | 2.1 |
-| Manuela Knobeloch | 21/11/2025 | Explicação detalhada de Funções e Procedures | 2.2 |
+| Mauricio Soares   | 11/11/2025 | Criação de functions | 2.1 |
+| Vinícius Gausmann | 11/11/2025 | Criação de procedures | 2.2 |
+| Manuela Knobeloch | 21/11/2025 | Explicação detalhada de Funções e Procedures | 2.3 |
 | Luiz Kirsch | 25/11/2025 | Documentação no GitHub | 3.0 |
 |Vinícius Gausmann | 28/11/2025 | Criação de events | 3.1 |
 | Luiz Kirsch | 02/12/2025 | Implementação completa de Views e Events | 3.2 |
